@@ -1,47 +1,43 @@
-import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
-import { getAllSources } from "@/lib/store";
-import { findMostRelevant } from "@/lib/vector-utils";
+import { NextRequest, NextResponse } from "next/server";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { QdrantVectorStore } from "@langchain/qdrant";
+import OpenAI from "openai";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const client = new OpenAI();
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const { query } = await req.json();
 
-        if (!query) {
-            return NextResponse.json({ error: "No query provided" }, { status: 400 });
-        }
-
-        // Embed query
-        const result = await client.embeddings.create({
+        const embeddings = new OpenAIEmbeddings({
             model: "text-embedding-3-large",
-            input: query,
         });
 
-        const queryEmbedding = result.data[0].embedding;
+        const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
+            url: "http://localhost:6333",
+            collectionName: "chaicode-collection",
+        });
 
-        // Retrieve top 3 relevant docs
-        const docs = getAllSources();
-        const topDocs = findMostRelevant(queryEmbedding, docs, 3);
+        const retriever = vectorStore.asRetriever({ k: 3 });
+        const relevantChunk = await retriever.invoke(query);
 
-        const context = topDocs.map((d) => d.content).join("\n\n");
+        const SYSTEM_PROMPT = `
+      You are an AI assistant. Answer the question based ONLY on the context below (from PDF):
+      Context:
+      ${JSON.stringify(relevantChunk)}
+    `;
 
-        // Ask GPT
         const response = await client.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4.1",
             messages: [
-                { role: "system", content: "You are a helpful assistant. Use the context to answer." },
-                { role: "system", content: `Context:\n${context}` },
+                { role: "system", content: SYSTEM_PROMPT },
                 { role: "user", content: query },
             ],
         });
 
-        const answer = response.choices[0].message?.content || "No answer found.";
-
-        return NextResponse.json({ answer, sources: topDocs });
-    } catch (err: unknown) {
-        console.error("Error in /chat:", err);
-        return NextResponse.json({ error: "Failed to generate answer" }, { status: 500 });
+        return NextResponse.json({ answer: response.choices[0].message.content });
+    } catch (error) {
+        console.error("Chat error:", error);
+        return NextResponse.json({ error: "Failed to process query" }, { status: 500 });
     }
 }

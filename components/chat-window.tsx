@@ -67,7 +67,15 @@ export function ChatWindow() {
     }
   }
 
- 
+  // Use a consistent formatter
+  const time = new Date()
+  const formatted = time
+    .toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .toUpperCase() // Always "PM" or "AM"
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -78,12 +86,18 @@ export function ChatWindow() {
 
   return (
     <Card className="p-4 shadow-md rounded-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
-      <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">Chat with RAG Assistant</Label>
+      <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">
+        Chat with RAG Assistant
+      </Label>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((message) => (
-          <div key={message.id} className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+          <div
+            key={message.id}
+            className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"
+              }`}
+          >
             {message.type === "ai" && (
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 bg-slate-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -93,19 +107,19 @@ export function ChatWindow() {
             )}
 
             <div
-              className={`max-w-[80%] p-3 rounded-2xl ${
-                message.type === "user"
+              className={`max-w-[80%] p-3 rounded-2xl ${message.type === "user"
                   ? "bg-blue-600 text-white dark:bg-gray-700 dark:text-gray-200"
                   : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200"
-              }`}
+                }`}
             >
               <p className="text-sm">{message.content}</p>
               <p
-                className={`text-xs mt-1 ${
-                  message.type === "user" ? "text-blue-100 dark:text-gray-400" : "text-slate-500 dark:text-gray-400"
-                }`}
+                className={`text-xs mt-1 ${message.type === "user"
+                    ? "text-blue-100 dark:text-gray-400"
+                    : "text-slate-500 dark:text-gray-400"
+                  }`}
               >
-                {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                {formatted}
               </p>
             </div>
 

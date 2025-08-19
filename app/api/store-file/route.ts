@@ -1,40 +1,51 @@
-import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
-import { randomUUID } from "crypto";
-import { addSource } from "@/lib/store";
+import { NextRequest, NextResponse } from "next/server";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { QdrantVectorStore } from "@langchain/qdrant";
+import path from "path";
+import fs from "fs/promises";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
-        const formData = await req.formData();
-        const file = formData.get("file") as File;
+        const data = await req.formData();
+        const file: File | null = data.get("file") as File;
 
         if (!file) {
-            return NextResponse.json({ error: "No file provided" }, { status: 400 });
+            return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
 
-        const text = await file.text();
+        // Ensure uploads directory exists
+        const uploadDir = path.join(process.cwd(), "uploads");
+        await fs.mkdir(uploadDir, { recursive: true });
 
-        const result = await client.embeddings.create({
+        // Save file locally
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filePath = path.join(uploadDir, file.name);
+        await fs.writeFile(filePath, buffer);
+
+        // Load PDF into LangChain
+        const loader = new PDFLoader(filePath);
+        const docs = await loader.load();
+
+        // Embed & store in Qdrant
+        const embeddings = new OpenAIEmbeddings({
             model: "text-embedding-3-large",
-            input: text,
         });
 
-        const embedding = result.data[0].embedding;
+        await QdrantVectorStore.fromDocuments(docs, embeddings, {
+            url: "http://localhost:6333",
+            collectionName: "myrag-collection",
+        });
 
-        const newSource = {
-            id: randomUUID(),
-            type: "file" as const,
-            content: text,
-            embedding,
-        };
-
-        addSource(newSource);
-
-        return NextResponse.json({ success: true, source: newSource });
-    } catch (err: unknown) {
-        console.error("Error in /store-file:", err);
-        return NextResponse.json({ error: "Failed to store file" }, { status: 500 });
+        return NextResponse.json({
+            success: true,
+            message: "PDF indexed successfully!",
+        });
+    } catch (error) {
+        console.error("Error indexing PDF:", error);
+        return NextResponse.json(
+            { error: "Failed to index PDF" },
+            { status: 500 }
+        );
     }
 }

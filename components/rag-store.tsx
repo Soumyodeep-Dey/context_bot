@@ -1,6 +1,6 @@
 "use client"
 
-import { useState  , useEffect} from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -21,8 +21,14 @@ export function RagStore() {
   const loadSources = async () => {
     try {
       const res = await fetch("/api/list-sources")
-      const data = await res.json()
-      setDataSources(data.sources)
+      const contentType = res.headers.get("content-type")
+      if (contentType && contentType.includes("application/json")) {
+        const data = await res.json()
+        setDataSources(data.sources)
+      } else {
+        const text = await res.text()
+        console.error("Expected JSON, got:", text)
+      }
     } catch (err) {
       console.error("Failed to fetch sources:", err)
     }
@@ -81,7 +87,7 @@ export function RagStore() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-700 dark:text-gray-200 truncate">{source.name}</p>
                   <p className="text-xs text-slate-500 dark:text-gray-400">
-                    Added {source.createdAt.toLocaleDateString()}
+                    Added {new Date(source.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <Button
