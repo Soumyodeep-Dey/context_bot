@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState  , useEffect} from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -16,35 +16,35 @@ interface DataSource {
 
 export function RagStore() {
   // Mock data for demonstration
-  const [dataSources, setDataSources] = useState<DataSource[]>([
-    {
-      id: "1",
-      type: "text",
-      name: "Product Documentation",
-      content: "User manual and product specifications...",
-      createdAt: new Date("2024-01-15"),
-    },
-    {
-      id: "2",
-      type: "file",
-      name: "company-policies.pdf",
-      content: "PDF document with company policies",
-      createdAt: new Date("2024-01-14"),
-    },
-    {
-      id: "3",
-      type: "url",
-      name: "https://example.com/blog",
-      content: "Website content from blog posts",
-      createdAt: new Date("2024-01-13"),
-    },
-  ])
+  const [dataSources, setDataSources] = useState<DataSource[]>([])
 
-  const handleRemove = (id: string) => {
-    setDataSources((prev) => prev.filter((source) => source.id !== id))
-    // TODO: Implement RAG store removal logic
-    console.log("Removing data source from RAG store:", id)
+  const loadSources = async () => {
+    try {
+      const res = await fetch("/api/list-sources")
+      const data = await res.json()
+      setDataSources(data.sources)
+    } catch (err) {
+      console.error("Failed to fetch sources:", err)
+    }
   }
+
+  useEffect(() => {
+    loadSources()
+  }, [])
+
+  const handleRemove = async (id: string) => {
+    try {
+      await fetch("/api/delete-source", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+      setDataSources((prev) => prev.filter((s) => s.id !== id))
+    } catch (err) {
+      console.error("Failed to delete source:", err)
+    }
+  }
+
 
   const getIcon = (type: string) => {
     switch (type) {

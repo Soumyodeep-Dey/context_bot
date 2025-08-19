@@ -13,18 +13,25 @@ export function WebsiteInput() {
 
   const handleFetchData = async () => {
     if (!url.trim()) return
-
     setIsLoading(true)
 
-    // TODO: Implement website scraping and RAG store integration
-    console.log("Fetching data from URL:", url)
+    try {
+      const res = await fetch("/api/store-website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      })
 
-    // Simulate API call
-    setTimeout(() => {
+      const data = await res.json()
+      console.log("Stored website:", data)
+    } catch (err) {
+      console.error("Failed to fetch website:", err)
+    } finally {
       setIsLoading(false)
       setUrl("")
-    }, 2000)
+    }
   }
+
 
   return (
     <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">

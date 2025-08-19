@@ -9,11 +9,25 @@ import { Label } from "@/components/ui/label"
 export function DataSourceInput() {
   const [textData, setTextData] = useState("")
 
-  const handleSave = () => {
-    // TODO: Implement RAG store integration
-    console.log("Saving text data to RAG store:", textData)
-    setTextData("")
+  const handleSave = async () => {
+    if (!textData.trim()) return
+
+    try {
+      const res = await fetch("/api/store-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textData }),
+      })
+
+      const data = await res.json()
+      console.log("Stored text:", data)
+
+      setTextData("")
+    } catch (err) {
+      console.error("Failed to save text:", err)
+    }
   }
+
 
   return (
     <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">

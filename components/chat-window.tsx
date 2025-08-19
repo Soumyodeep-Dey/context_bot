@@ -43,21 +43,31 @@ export function ChatWindow() {
     setInputValue("")
     setIsLoading(true)
 
-    // TODO: Implement RAG query processing
-    console.log("Processing RAG query:", inputValue)
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: inputValue }),
+      })
 
-    // Simulate AI response
-    setTimeout(() => {
+      const data = await res.json()
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "ai",
-        content: `I understand you're asking about "${inputValue}". Based on your indexed data sources, I would search through your documents and provide relevant information. This is where the RAG system would process your query and return contextual answers.`,
+        content: data.answer || "No answer found.",
         timestamp: new Date(),
       }
+
       setMessages((prev) => [...prev, aiMessage])
+    } catch (err) {
+      console.error("Failed to fetch chat answer:", err)
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
+
+ 
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

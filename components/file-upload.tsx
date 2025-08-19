@@ -42,21 +42,33 @@ export function FileUpload() {
     processFiles(files)
   }
 
-  const processFiles = (files: File[]) => {
-    const validFiles = files.filter((file) => ["application/pdf", "text/csv", "text/plain"].includes(file.type))
+  const processFiles = async (files: File[]) => {
+    const validFiles = files.filter((file) =>
+      ["application/pdf", "text/csv", "text/plain"].includes(file.type)
+    )
 
-    const newFiles: UploadedFile[] = validFiles.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    }))
+    for (const file of validFiles) {
+      const id = `${file.name}-${file.size}-${file.lastModified}`
+      setUploadedFiles((prev) => [
+        ...prev,
+        { id, name: file.name, size: file.size, type: file.type },
+      ])
+      const formData = new FormData()
+      formData.append("file", file)
 
-    setUploadedFiles((prev) => [...prev, ...newFiles])
-
-    // TODO: Implement file processing and RAG store integration
-    console.log("Processing files for RAG store:", newFiles)
+      try {
+        const res = await fetch("/api/store-file", {
+          method: "POST",
+          body: formData,
+        })
+        const data = await res.json()
+        console.log("Stored file:", data)
+      } catch (err) {
+        console.error("Failed to upload file:", err)
+      }
+    }
   }
+
 
   return (
     <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
