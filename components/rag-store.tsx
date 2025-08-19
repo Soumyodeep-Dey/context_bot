@@ -49,24 +49,24 @@ export function RagStore() {
   const getIcon = (type: string) => {
     switch (type) {
       case "text":
-        return <Type className="h-4 w-4 text-blue-500" />
+        return <Type className="h-4 w-4 text-blue-500 dark:text-gray-400" />
       case "file":
-        return <FileText className="h-4 w-4 text-green-500" />
+        return <FileText className="h-4 w-4 text-green-500 dark:text-gray-400" />
       case "url":
-        return <Globe className="h-4 w-4 text-purple-500" />
+        return <Globe className="h-4 w-4 text-purple-500 dark:text-gray-400" />
       default:
-        return <FileText className="h-4 w-4 text-slate-500" />
+        return <FileText className="h-4 w-4 text-slate-500 dark:text-gray-500" />
     }
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl">
+    <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-slate-700">Indexed Data Sources</Label>
+        <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200">Indexed Data Sources</Label>
 
         {dataSources.length === 0 ? (
-          <div className="text-center py-8 text-slate-500">
-            <FileText className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+          <div className="text-center py-8 text-slate-500 dark:text-gray-400">
+            <FileText className="h-12 w-12 mx-auto mb-2 text-slate-300 dark:text-gray-600" />
             <p>No data sources indexed yet</p>
             <p className="text-sm">Add text, upload files, or fetch from websites above</p>
           </div>
@@ -75,18 +75,20 @@ export function RagStore() {
             {dataSources.map((source) => (
               <div
                 key={source.id}
-                className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow"
+                className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 hover:shadow-sm transition-shadow"
               >
                 {getIcon(source.type)}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 truncate">{source.name}</p>
-                  <p className="text-xs text-slate-500">Added {source.createdAt.toLocaleDateString()}</p>
+                  <p className="text-sm font-medium text-slate-700 dark:text-gray-200 truncate">{source.name}</p>
+                  <p className="text-xs text-slate-500 dark:text-gray-400">
+                    Added {source.createdAt.toLocaleDateString()}
+                  </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRemove(source.id)}
-                  className="text-slate-400 hover:text-red-500"
+                  className="text-slate-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

@@ -67,8 +67,8 @@ export function ChatWindow() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl h-[600px] flex flex-col">
-      <Label className="text-lg font-semibold text-slate-700 mb-4">Chat with RAG Assistant</Label>
+    <Card className="p-4 shadow-md rounded-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
+      <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">Chat with RAG Assistant</Label>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
@@ -76,27 +76,33 @@ export function ChatWindow() {
           <div key={message.id} className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"}`}>
             {message.type === "ai" && (
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-slate-600" />
+                <div className="w-8 h-8 bg-slate-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-slate-600 dark:text-gray-300" />
                 </div>
               </div>
             )}
 
             <div
               className={`max-w-[80%] p-3 rounded-2xl ${
-                message.type === "user" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"
+                message.type === "user"
+                  ? "bg-blue-600 text-white dark:bg-gray-700 dark:text-gray-200"
+                  : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200"
               }`}
             >
               <p className="text-sm">{message.content}</p>
-              <p className={`text-xs mt-1 ${message.type === "user" ? "text-blue-100" : "text-slate-500"}`}>
+              <p
+                className={`text-xs mt-1 ${
+                  message.type === "user" ? "text-blue-100 dark:text-gray-400" : "text-slate-500 dark:text-gray-400"
+                }`}
+              >
                 {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </p>
             </div>
 
             {message.type === "user" && (
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
+                <div className="w-8 h-8 bg-blue-600 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4 text-white dark:text-gray-300" />
                 </div>
               </div>
             )}
@@ -106,19 +112,19 @@ export function ChatWindow() {
         {isLoading && (
           <div className="flex gap-3 justify-start">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                <Bot className="h-4 w-4 text-slate-600" />
+              <div className="w-8 h-8 bg-slate-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <Bot className="h-4 w-4 text-slate-600 dark:text-gray-300" />
               </div>
             </div>
-            <div className="bg-slate-100 text-slate-700 p-3 rounded-2xl">
+            <div className="bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200 p-3 rounded-2xl">
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-slate-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                 <div
-                  className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-slate-400 dark:bg-gray-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.1s" }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-slate-400 dark:bg-gray-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}
                 ></div>
               </div>
@@ -140,7 +146,7 @@ export function ChatWindow() {
         <Button
           onClick={handleSendMessage}
           disabled={!inputValue.trim() || isLoading}
-          className="bg-blue-600 text-white hover:bg-blue-700"
+          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-gray-700 dark:hover:bg-gray-600"
         >
           <Send className="h-4 w-4" />
         </Button>

@@ -27,15 +27,15 @@ export function WebsiteInput() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl">
+    <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
       <div className="space-y-4">
-        <Label htmlFor="website-url" className="text-lg font-semibold text-slate-700">
+        <Label htmlFor="website-url" className="text-lg font-semibold text-slate-700 dark:text-gray-200">
           Website Input
         </Label>
 
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-gray-500" />
             <Input
               id="website-url"
               type="url"
@@ -48,7 +48,7 @@ export function WebsiteInput() {
           <Button
             onClick={handleFetchData}
             disabled={!url.trim() || isLoading}
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-gray-700 dark:hover:bg-gray-600"
           >
             {isLoading ? (
               <>

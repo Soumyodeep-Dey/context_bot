@@ -59,21 +59,23 @@ export function FileUpload() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl">
+    <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-slate-700">Upload Files</Label>
+        <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200">Upload Files</Label>
 
         <div
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-            isDragOver ? "border-blue-400 bg-blue-50" : "border-slate-300 hover:border-slate-400"
+            isDragOver
+              ? "border-blue-400 bg-blue-50 dark:bg-gray-800"
+              : "border-slate-300 dark:border-gray-700 hover:border-slate-400 dark:hover:border-gray-600"
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <Upload className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-          <p className="text-slate-600 mb-2">Drag and drop files here, or click to select</p>
-          <p className="text-sm text-slate-500 mb-4">Supports PDF, CSV, and TXT files</p>
+          <Upload className="mx-auto h-12 w-12 text-slate-400 dark:text-gray-500 mb-4" />
+          <p className="text-slate-600 dark:text-gray-300 mb-2">Drag and drop files here, or click to select</p>
+          <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">Supports PDF, CSV, and TXT files</p>
           <input
             type="file"
             multiple
@@ -91,12 +93,12 @@ export function FileUpload() {
 
         {uploadedFiles.length > 0 && (
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-slate-600">Uploaded Files:</Label>
+            <Label className="text-sm font-medium text-slate-600 dark:text-gray-300">Uploaded Files:</Label>
             {uploadedFiles.map((file) => (
-              <div key={file.id} className="flex items-center gap-2 p-2 bg-slate-100 rounded-lg">
-                <File className="h-4 w-4 text-slate-500" />
-                <span className="text-sm text-slate-700 flex-1">{file.name}</span>
-                <span className="text-xs text-slate-500">{(file.size / 1024).toFixed(1)} KB</span>
+              <div key={file.id} className="flex items-center gap-2 p-2 bg-slate-100 dark:bg-gray-800 rounded-lg">
+                <File className="h-4 w-4 text-slate-500 dark:text-gray-400" />
+                <span className="text-sm text-slate-700 dark:text-gray-200 flex-1">{file.name}</span>
+                <span className="text-xs text-slate-500 dark:text-gray-400">{(file.size / 1024).toFixed(1)} KB</span>
               </div>
             ))}
           </div>
