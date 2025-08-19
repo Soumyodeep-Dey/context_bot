@@ -1,0 +1,37 @@
+"use client"
+
+import { useState } from "react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+
+export function DataSourceInput() {
+  const [textData, setTextData] = useState("")
+
+  const handleSave = () => {
+    // TODO: Implement RAG store integration
+    console.log("Saving text data to RAG store:", textData)
+    setTextData("")
+  }
+
+  return (
+    <Card className="p-4 shadow-md rounded-2xl">
+      <div className="space-y-4">
+        <Label htmlFor="text-input" className="text-lg font-semibold text-slate-700">
+          Enter Data (Text Source)
+        </Label>
+        <Textarea
+          id="text-input"
+          placeholder="Paste your text content here..."
+          value={textData}
+          onChange={(e) => setTextData(e.target.value)}
+          className="min-h-[120px] resize-none"
+        />
+        <Button onClick={handleSave} disabled={!textData.trim()} className="bg-blue-600 text-white hover:bg-blue-700">
+          Save to RAG Store
+        </Button>
+      </div>
+    </Card>
+  )
+}

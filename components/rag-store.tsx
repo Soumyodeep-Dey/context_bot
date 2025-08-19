@@ -1,0 +1,100 @@
+"use client"
+
+import { useState } from "react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Trash2, FileText, Globe, Type } from "lucide-react"
+
+interface DataSource {
+  id: string
+  type: "text" | "file" | "url"
+  name: string
+  content: string
+  createdAt: Date
+}
+
+export function RagStore() {
+  // Mock data for demonstration
+  const [dataSources, setDataSources] = useState<DataSource[]>([
+    {
+      id: "1",
+      type: "text",
+      name: "Product Documentation",
+      content: "User manual and product specifications...",
+      createdAt: new Date("2024-01-15"),
+    },
+    {
+      id: "2",
+      type: "file",
+      name: "company-policies.pdf",
+      content: "PDF document with company policies",
+      createdAt: new Date("2024-01-14"),
+    },
+    {
+      id: "3",
+      type: "url",
+      name: "https://example.com/blog",
+      content: "Website content from blog posts",
+      createdAt: new Date("2024-01-13"),
+    },
+  ])
+
+  const handleRemove = (id: string) => {
+    setDataSources((prev) => prev.filter((source) => source.id !== id))
+    // TODO: Implement RAG store removal logic
+    console.log("Removing data source from RAG store:", id)
+  }
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case "text":
+        return <Type className="h-4 w-4 text-blue-500" />
+      case "file":
+        return <FileText className="h-4 w-4 text-green-500" />
+      case "url":
+        return <Globe className="h-4 w-4 text-purple-500" />
+      default:
+        return <FileText className="h-4 w-4 text-slate-500" />
+    }
+  }
+
+  return (
+    <Card className="p-4 shadow-md rounded-2xl">
+      <div className="space-y-4">
+        <Label className="text-lg font-semibold text-slate-700">Indexed Data Sources</Label>
+
+        {dataSources.length === 0 ? (
+          <div className="text-center py-8 text-slate-500">
+            <FileText className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+            <p>No data sources indexed yet</p>
+            <p className="text-sm">Add text, upload files, or fetch from websites above</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {dataSources.map((source) => (
+              <div
+                key={source.id}
+                className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow"
+              >
+                {getIcon(source.type)}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">{source.name}</p>
+                  <p className="text-xs text-slate-500">Added {source.createdAt.toLocaleDateString()}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemove(source.id)}
+                  className="text-slate-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}
