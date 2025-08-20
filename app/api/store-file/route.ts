@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { QdrantVectorStore } from "@langchain/qdrant";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import path from "path";
 import fs from "fs/promises";
 
@@ -25,7 +26,14 @@ export async function POST(req: NextRequest) {
 
         // Load PDF into LangChain
         const loader = new PDFLoader(filePath);
-        const docs = await loader.load();
+        const rawDocs = await loader.load();
+
+        // ✅ Split into smaller chunks for better retrieval
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 200,
+        });
+        const docs = await splitter.splitDocuments(rawDocs);
 
         // Embed & store in Qdrant
         const embeddings = new OpenAIEmbeddings({
@@ -34,7 +42,7 @@ export async function POST(req: NextRequest) {
 
         await QdrantVectorStore.fromDocuments(docs, embeddings, {
             url: "http://localhost:6333",
-            collectionName: "myrag-collection",
+            collectionName: "myrag-collection", // ✅ must match chat/route.ts
         });
 
         return NextResponse.json({
