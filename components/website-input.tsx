@@ -5,15 +5,17 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Globe, Loader2 } from "lucide-react"
+import { Globe, Loader2, CheckCircle, XCircle } from "lucide-react"
 
 export function WebsiteInput() {
   const [url, setUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const handleFetchData = async () => {
     if (!url.trim()) return
     setIsLoading(true)
+    setMessage(null)
 
     try {
       const res = await fetch("/api/store-website", {
@@ -23,15 +25,20 @@ export function WebsiteInput() {
       })
 
       const data = await res.json()
-      console.log("Stored website:", data)
+
+      if (res.ok) {
+        setMessage({ type: "success", text: `✅ Website indexed: ${url}` })
+      } else {
+        setMessage({ type: "error", text: `❌ Failed to index: ${data.error || url}` })
+      }
     } catch (err) {
       console.error("Failed to fetch website:", err)
+      setMessage({ type: "error", text: `❌ Upload failed for ${url}` })
     } finally {
       setIsLoading(false)
       setUrl("")
     }
   }
-
 
   return (
     <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
@@ -67,6 +74,23 @@ export function WebsiteInput() {
             )}
           </Button>
         </div>
+
+        {/* ✅ Success/Error message */}
+        {message && (
+          <div
+            className={`flex items-center gap-2 p-2 rounded-lg text-sm ${message.type === "success"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+              }`}
+          >
+            {message.type === "success" ? (
+              <CheckCircle className="h-4 w-4" />
+            ) : (
+              <XCircle className="h-4 w-4" />
+            )}
+            {message.text}
+          </div>
+        )}
       </div>
     </Card>
   )

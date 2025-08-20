@@ -9,6 +9,11 @@ export async function POST(req: NextRequest) {
     try {
         const { query } = await req.json();
 
+        if (!query || query.trim().length === 0) {
+            return NextResponse.json({ error: "No query provided" }, { status: 400 });
+        }
+
+        // Load embeddings + retriever
         const embeddings = new OpenAIEmbeddings({
             model: "text-embedding-3-large",
         });
@@ -17,20 +22,21 @@ export async function POST(req: NextRequest) {
             embeddings,
             {
                 url: "http://localhost:6333",
-                collectionName: "myrag-collection", // ✅ same name
+                collectionName: "myrag-collection", // ✅ all formats share this
             }
         );
 
-        const retriever = vectorStore.asRetriever({ k: 10 }); // more chunks
+        const retriever = vectorStore.asRetriever({ k: 10 }); // retrieve top 10
         const relevantChunk = await retriever.invoke(query);
 
+        // System prompt updated ✅
         const SYSTEM_PROMPT = `
-      You are an AI assistant. 
-      Answer ONLY based on the context below (from uploaded PDFs). 
-      If the answer is not in the context, say "I don’t know from the PDF".
-      
-      Context:
-      ${JSON.stringify(relevantChunk)}
+You are an AI assistant.
+Answer ONLY based on the retrieved context below (from uploaded PDFs, websites, or pasted text).
+If the answer is not in the context, reply exactly: "I don’t know from the provided sources."
+
+Context:
+${JSON.stringify(relevantChunk)}
     `;
 
         const response = await client.chat.completions.create({

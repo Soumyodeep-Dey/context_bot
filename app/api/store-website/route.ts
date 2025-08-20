@@ -1,143 +1,122 @@
-import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
-import { randomUUID } from "crypto";
-import { addSource } from "@/lib/store";
-import pdfParse from "pdf-parse";
+import { NextRequest, NextResponse } from "next/server";
+import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
+import { PuppeteerWebBaseLoader } from "@langchain/community/document_loaders/web/puppeteer";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { QdrantVectorStore } from "@langchain/qdrant";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import fs from "fs/promises";
+import path from "path";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
-        let text = "";
-        let sourceType: "file" | "website" = "website";
+        let url: string | undefined;
+        let docs = [];
 
-        // Try to parse as JSON first (for URL uploads)
-        let url = "";
         try {
+            // JSON body (URL upload)
             const body = await req.json();
-            url = body.url;
+            url = body?.url;
         } catch {
-            // Not JSON, try as formData (for file uploads)
+            // ignore → might be file upload
         }
 
         if (url) {
-            // URL-based processing
-            const response = await fetch(url);
-            if (!response.ok) {
-                const contentType = response.headers.get("content-type") || "";
-                if (contentType.includes("text/html")) {
-                    const html = await response.text();
-                    return NextResponse.json({ error: `Failed to fetch URL: Received HTML error page.`, details: html }, { status: 400 });
+            // === Website or remote PDF ===
+            if (url.endsWith(".pdf")) {
+                // Download PDF to temp file
+                const res = await fetch(url);
+                if (!res.ok) {
+                    return NextResponse.json(
+                        { error: `Failed to fetch PDF from URL: ${res.statusText}` },
+                        { status: 400 }
+                    );
                 }
-                return NextResponse.json({ error: `Failed to fetch URL: ${response.status} ${response.statusText}` }, { status: 400 });
-            }
-            const contentType = response.headers.get("content-type") || "";
-            if (contentType.includes("application/pdf") || url.endsWith(".pdf")) {
-                // PDF from URL
-                const arrayBuffer = await response.arrayBuffer();
-                let pdfData;
-                try {
-                    pdfData = await pdfParse(Buffer.from(arrayBuffer));
-                } catch (pdfErr) {
-                    console.error("PDF parsing error:", pdfErr);
-                    return NextResponse.json({ error: "Failed to parse PDF." }, { status: 400 });
-                }
-                if (!pdfData.text || pdfData.text.trim().length === 0) {
-                    return NextResponse.json({ error: "PDF contains no extractable text." }, { status: 400 });
-                }
-                text = pdfData.text;
-                sourceType = "file";
-            } else if (contentType.includes("application/json")) {
-                // JSON from URL
-                try {
-                    const json = await response.json();
-                    text = JSON.stringify(json);
-                } catch {
-                    return NextResponse.json({ error: "Failed to parse JSON from URL." }, { status: 400 });
-                }
-                sourceType = "website";
+                const buffer = Buffer.from(await res.arrayBuffer());
+                const uploadDir = path.join(process.cwd(), "uploads");
+                await fs.mkdir(uploadDir, { recursive: true });
+                const filePath = path.join(uploadDir, `remote-${Date.now()}.pdf`);
+                await fs.writeFile(filePath, buffer);
+
+                const loader = new PDFLoader(filePath, { splitPages: true });
+                docs = await loader.load();
             } else {
-                // HTML or other text from URL
-                const html = await response.text();
-                text = html.replace(/<[^>]*>?/gm, "");
-                if (!text || text.trim().length === 0) {
-                    return NextResponse.json({ error: "Website contains no extractable text." }, { status: 400 });
+                // Try Cheerio first (fast), then Puppeteer
+                try {
+                    const cheerioLoader = new CheerioWebBaseLoader(url);
+                    docs = await cheerioLoader.load();
+                } catch {
+                    console.warn("Cheerio failed, falling back to Puppeteer...");
+                    const puppeteerLoader = new PuppeteerWebBaseLoader(url, {
+                        launchOptions: { headless: "new" },
+                        gotoOptions: { waitUntil: "domcontentloaded" },
+                    });
+                    docs = await puppeteerLoader.load();
                 }
-                sourceType = "website";
             }
-        } else {
-            // Try to parse as formData (for file uploads)
-            const formData = await req.formData();
-            const file = formData.get("file");
-            if (!file || typeof file === "string") {
-                return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
-            }
-            if (file.type !== "application/pdf") {
-                return NextResponse.json({ error: "Only PDF files are supported." }, { status: 400 });
-            }
-            const arrayBuffer = await file.arrayBuffer();
-            let pdfData;
-            try {
-                pdfData = await pdfParse(Buffer.from(arrayBuffer));
-            } catch (pdfErr) {
-                console.error("PDF parsing error:", pdfErr);
-                return NextResponse.json({ error: "Failed to parse PDF." }, { status: 400 });
-            }
-            if (!pdfData.text || pdfData.text.trim().length === 0) {
-                return NextResponse.json({ error: "PDF contains no extractable text." }, { status: 400 });
-            }
-            text = pdfData.text;
-            sourceType = "file";
-        }
 
-        // Chunk text if too large
-        const maxChunkLength = 16000; // ~8k tokens
-        const chunks = [];
-        let start = 0;
-        while (start < text.length) {
-            chunks.push(text.slice(start, start + maxChunkLength));
-            start += maxChunkLength;
-        }
-
-        // Get embeddings for each chunk and combine (average)
-        const embeddings = [];
-        for (const chunk of chunks) {
-            const result = await client.embeddings.create({
-                model: "text-embedding-3-large",
-                input: chunk,
+            // Add metadata
+            docs.forEach((doc) => {
+                doc.metadata.source = url;
             });
-            embeddings.push(result.data[0].embedding);
+        } else {
+            // === File upload ===
+            const formData = await req.formData();
+            const file = formData.get("file") as File;
+
+            if (!file) {
+                return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+            }
+
+            const bytes = Buffer.from(await file.arrayBuffer());
+            const uploadDir = path.join(process.cwd(), "uploads");
+            await fs.mkdir(uploadDir, { recursive: true });
+            const filePath = path.join(uploadDir, file.name);
+            await fs.writeFile(filePath, bytes);
+
+            if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+                const loader = new PDFLoader(filePath, { splitPages: true });
+                docs = await loader.load();
+            } else {
+                return NextResponse.json(
+                    { error: "Only PDF uploads supported here." },
+                    { status: 400 }
+                );
+            }
+
+            docs.forEach((doc) => {
+                doc.metadata.source = file.name;
+            });
         }
 
-        // Average embeddings if multiple chunks
-        function averageEmbeddings(arrays: number[][]) {
-            if (arrays.length === 1) return arrays[0];
-            const length = arrays[0].length;
-            const avg = Array(length).fill(0);
-            for (const arr of arrays) {
-                for (let i = 0; i < length; i++) {
-                    avg[i] += arr[i];
-                }
-            }
-            for (let i = 0; i < length; i++) {
-                avg[i] /= arrays.length;
-            }
-            return avg;
-        }
-        const embedding = averageEmbeddings(embeddings);
+        // === Split text into chunks ===
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 200,
+        });
+        const splitDocs = await splitter.splitDocuments(docs);
 
-        const newSource = {
-            id: randomUUID(),
-            type: sourceType,
-            content: text,
-            embedding,
-        };
+        // === Embed & store in Qdrant ===
+        const embeddings = new OpenAIEmbeddings({
+            model: "text-embedding-3-large",
+        });
 
-        addSource(newSource);
+        await QdrantVectorStore.fromDocuments(splitDocs, embeddings, {
+            url: "http://localhost:6333",
+            collectionName: "myrag-collection",
+        });
 
-        return NextResponse.json({ success: true, source: newSource });
-    } catch (err: unknown) {
+        return NextResponse.json({
+            success: true,
+            message: url
+                ? `Website (${url}) indexed successfully!`
+                : `File indexed successfully!`,
+        });
+    } catch (err) {
         console.error("Error in /store-website:", err);
-        return NextResponse.json({ error: "Failed to fetch website or PDF" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to fetch or parse website/PDF" },
+            { status: 500 }
+        );
     }
 }

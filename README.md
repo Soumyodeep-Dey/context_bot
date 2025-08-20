@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Context Bot (RAG Application)
+
+A Next.js app for Retrieval-Augmented Generation (RAG) using OpenAI, Qdrant, and LangChain. Index and query data from PDFs, websites, and text.
+
+## Features
+
+- Upload and index PDFs, CSVs, and text files
+- Index website content and remote PDFs
+- Store embeddings in Qdrant (via Docker)
+- Chat interface powered by OpenAI (GPT-4o-mini, GPT-4.1-mini)
+- Context-aware answers based on your uploaded sources
+- Modern UI with Tailwind, Radix, and Lucide icons
+- Theme support (light/dark)
+
+## Project Structure
+
+```
+app/
+  api/                # REST endpoints for chat, file/text/website storage, source listing/deletion
+  components/         # UI components (chat window, file upload, etc.)
+  lib/                # Utility functions, text splitting, store logic
+  public/             # Static assets (SVGs, favicon)
+  uploads/            # Uploaded files (created at runtime)
+scripts/              # Utility scripts (e.g., test-qdrant.cjs)
+```
 
 ## Getting Started
 
-First, run the development server:
+1. Start Qdrant (vector DB) via Docker:
+   ```bash
+   docker-compose up -d
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## API Endpoints
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `POST /api/chat` — Ask questions, get context-aware answers
+- `POST /api/store-file` — Upload and index files (PDF, CSV, TXT)
+- `POST /api/store-text` — Store raw text
+- `POST /api/store-website` — Index website or remote PDF
+- `GET /api/list-sources` — List indexed sources
+- `POST /api/delete-source` — Delete a source by ID
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js, React, TypeScript
+- LangChain, OpenAI, Qdrant
+- Tailwind CSS, Radix UI, Lucide Icons
+- Docker (Qdrant)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---

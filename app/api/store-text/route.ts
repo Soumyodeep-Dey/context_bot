@@ -1,14 +1,9 @@
-import { NextResponse } from "next/server";
-import { OpenAI } from "openai";
-import { randomUUID } from "crypto";
-import { addSource } from "@/lib/store";
-import { splitTextIntoChunks } from "@/lib/text-splitter";
+import { NextRequest, NextResponse } from "next/server";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { QdrantVectorStore } from "@langchain/qdrant";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
-const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const text: string = body?.content ?? body?.text ?? "";
@@ -17,29 +12,43 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "No content provided" }, { status: 400 });
         }
 
-        const chunks = splitTextIntoChunks(text);
-
-        const result = await client.embeddings.create({
-            model: "text-embedding-3-large",
-            input: chunks,
+        // 1. Split text into chunks (consistent with PDFs & websites)
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 200,
         });
 
-        const created: Array<{ id: string; type: "text"; content: string; embedding: number[] }> = [];
-        for (let i = 0; i < chunks.length; i++) {
-            const embedding = result.data[i].embedding as number[];
-            const newSource = {
-                id: randomUUID(),
-                type: "text" as const,
-                content: chunks[i],
-                embedding,
-            };
-            addSource(newSource);
-            created.push(newSource);
-        }
+        const docs = await splitter.createDocuments([text]);
 
-        return NextResponse.json({ success: true, sources: created });
-    } catch (err: unknown) {
+        // Add metadata so we know it's "raw text"
+        docs.forEach((doc, idx) => {
+            doc.metadata = {
+                source: `text-${Date.now()}-${idx}`,
+                type: "text",
+            };
+        });
+
+        // 2. Create embeddings
+        const embeddings = new OpenAIEmbeddings({
+            model: "text-embedding-3-large",
+        });
+
+        // 3. Store in Qdrant (same collection as PDFs & websites)
+        await QdrantVectorStore.fromDocuments(docs, embeddings, {
+            url: "http://localhost:6333",
+            collectionName: "myrag-collection",
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Text stored successfully",
+            sources: docs.map((doc) => doc.metadata.source),
+        });
+    } catch (err) {
         console.error("Error in /store-text:", err);
-        return NextResponse.json({ error: "Failed to store text" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to store text" },
+            { status: 500 }
+        );
     }
 }
