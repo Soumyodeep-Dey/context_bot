@@ -4,11 +4,12 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Context Bot | RAG Application",
+  description: "A Next.js app for Retrieval-Augmented Generation (RAG) using OpenAI, Qdrant, and LangChain. Index and query data from PDFs, websites, and text.",
+  generator: "Soumyodeep Dey",
 }
 
 export default function RootLayout({
@@ -27,9 +28,12 @@ html {
 }
         `}</style>
       </head>
-      <body>
+      <body className="bg-slate-50 dark:bg-black min-h-screen flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
