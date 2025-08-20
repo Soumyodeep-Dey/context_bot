@@ -12,6 +12,10 @@ A Next.js app for Retrieval-Augmented Generation (RAG) using OpenAI, Qdrant, and
 - Modern UI with Tailwind, Radix, and Lucide icons
 - Theme support (light/dark)
 
+## Demo
+
+Watch the demo on YouTube: [https://youtu.be/Zi-qxFximXI](https://youtu.be/Zi-qxFximXI)
+
 ## Screenshots
 
 ![Screenshot 1](public/ss1.png)

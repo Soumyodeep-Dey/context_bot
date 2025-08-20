@@ -4,10 +4,11 @@ import { WebsiteInput } from "@/components/website-input"
 import { RagStore } from "@/components/rag-store"
 import { ChatWindow } from "@/components/chat-window"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Footer } from "@/components/footer"   // ✅ Import Footer
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-black">
       {/* Navigation Bar */}
       <nav className="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,7 +24,7 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Data Input */}
           <div className="space-y-6">
@@ -39,6 +40,9 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* ✅ Footer */}
+      <Footer />
     </div>
   )
 }
