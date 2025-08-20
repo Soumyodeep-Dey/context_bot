@@ -1,6 +1,7 @@
 "use client"
 
-import { FaGithub, FaLinkedin, FaDev, FaEnvelope, FaTwitter } from "react-icons/fa"
+import { FaGithub, FaLinkedin, FaEnvelope, FaTwitter } from "react-icons/fa"
+import { SiHashnode } from "react-icons/si"
 
 export function Footer() {
     return (
@@ -19,8 +20,8 @@ export function Footer() {
                     <a href="https://www.linkedin.com/in/soumyodeepdey-s-d-2a125b1a7" aria-label="LinkedIn" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 hover:scale-125 transform">
                         <FaLinkedin />
                     </a>
-                    <a href="https://dev.to/soumyodeep_dey" aria-label="DEV" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 hover:scale-125 transform">
-                        <FaDev />
+                    <a href="https://soumyodeep09.hashnode.dev/" aria-label="Hashnode" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 hover:scale-125 transform">
+                        <SiHashnode />
                     </a>
                     <a href="mailto:soumyodeepdey2003@gmail.com" aria-label="Email" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 hover:scale-125 transform">
                         <FaEnvelope />
