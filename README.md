@@ -12,6 +12,11 @@ A Next.js app for Retrieval-Augmented Generation (RAG) using OpenAI, Qdrant, and
 - Modern UI with Tailwind, Radix, and Lucide icons
 - Theme support (light/dark)
 
+## Screenshots
+
+![Screenshot 1](public/ss1.png)
+![Screenshot 2](public/ss2.png)
+
 ## Project Structure
 
 ```
@@ -19,7 +24,7 @@ app/
   api/                # REST endpoints for chat, file/text/website storage, source listing/deletion
   components/         # UI components (chat window, file upload, etc.)
   lib/                # Utility functions, text splitting, store logic
-  public/             # Static assets (SVGs, favicon)
+  public/             # Static assets (SVGs, favicon, screenshots)
   uploads/            # Uploaded files (created at runtime)
 scripts/              # Utility scripts (e.g., test-qdrant.cjs)
 ```
