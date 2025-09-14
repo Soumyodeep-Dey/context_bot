@@ -3,7 +3,7 @@ import { listSources } from "@/lib/store";
 
 export async function GET() {
     try {
-        const sources = listSources();
+        const sources = await listSources();
         return NextResponse.json({ sources });
     } catch (err: unknown) {
         console.error("Error in /list-sources:", err);

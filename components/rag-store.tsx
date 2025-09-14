@@ -8,9 +8,9 @@ import { Trash2, FileText, Globe, Type } from "lucide-react"
 
 interface DataSource {
   id: string
-  type: "text" | "file" | "url"
+  type: "text" | "file" | "website"
   name: string
-  content: string
+  source: string
   createdAt: Date
 }
 
@@ -38,14 +38,14 @@ export function RagStore() {
     loadSources()
   }, [])
 
-  const handleRemove = async (id: string) => {
+  const handleRemove = async (source: DataSource) => {
     try {
       await fetch("/api/delete-source", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id: source.id, source: source.source }),
       })
-      setDataSources((prev) => prev.filter((s) => s.id !== id))
+      setDataSources((prev) => prev.filter((s) => s.id !== source.id))
     } catch (err) {
       console.error("Failed to delete source:", err)
     }
@@ -58,7 +58,7 @@ export function RagStore() {
         return <Type className="h-4 w-4 text-blue-500 dark:text-gray-400" />
       case "file":
         return <FileText className="h-4 w-4 text-green-500 dark:text-gray-400" />
-      case "url":
+      case "website":
         return <Globe className="h-4 w-4 text-purple-500 dark:text-gray-400" />
       default:
         return <FileText className="h-4 w-4 text-slate-500 dark:text-gray-500" />
@@ -93,7 +93,7 @@ export function RagStore() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleRemove(source.id)}
+                  onClick={() => handleRemove(source)}
                   className="text-slate-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
                 >
                   <Trash2 className="h-4 w-4" />
