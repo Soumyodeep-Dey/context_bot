@@ -3,7 +3,7 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 
 export type DataSource = {
     id: string;
-    type: "text" | "file" | "website";
+    type: "text" | "file" | "website" | "vtt";
     name: string;
     source: string;
     createdAt: Date;
@@ -45,7 +45,7 @@ export async function listSources() {
         scrollResult.points.forEach((point: any) => {
             if (point.payload && point.payload.metadata && point.payload.metadata.source) {
                 const source = point.payload.metadata.source;
-                const type = point.payload.metadata.type || (source.startsWith('http') ? 'website' : source.endsWith('.pdf') || source.endsWith('.txt') || source.endsWith('.csv') ? 'file' : 'text');
+                const type = point.payload.metadata.type || (source.startsWith('http') ? 'website' : source.endsWith('.pdf') || source.endsWith('.txt') || source.endsWith('.csv') || source.endsWith('.vtt') ? 'file' : 'text');
                 const name = source.includes('/') ? source.split('/').pop() : source;
                 
                 if (!sourceMap.has(source)) {
@@ -61,7 +61,7 @@ export async function listSources() {
         // Convert to DataSource format
         return Array.from(sourceMap.entries()).map(([source, info], index) => ({
             id: `source-${index}`,
-            type: info.type as "text" | "file" | "website",
+            type: info.type as "text" | "file" | "website" | "vtt",
             name: info.name,
             source,
             createdAt: info.createdAt

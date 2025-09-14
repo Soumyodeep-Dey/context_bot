@@ -1,5 +1,6 @@
 import { DataSourceInput } from "@/components/data-source-input"
 import { FileUpload } from "@/components/file-upload"
+import { BulkUpload } from "@/components/bulk-upload"
 import { WebsiteInput } from "@/components/website-input"
 import { RagStore } from "@/components/rag-store"
 import { ChatWindow } from "@/components/chat-window"
@@ -30,6 +31,7 @@ export default function Home() {
           <div className="space-y-6">
             <DataSourceInput />
             <FileUpload />
+            <BulkUpload />
             <WebsiteInput />
             <RagStore />
           </div>

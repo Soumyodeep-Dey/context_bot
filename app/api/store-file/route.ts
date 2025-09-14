@@ -7,6 +7,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
+import { VTTLoader } from "@/lib/vtt-loader";
 
 export async function POST(req: NextRequest) {
     try {
@@ -27,12 +28,16 @@ export async function POST(req: NextRequest) {
 
         // Choose loader depending on file type
         let loader;
-        if (file.type === "application/pdf") {
+        const fileName = file.name.toLowerCase();
+        
+        if (file.type === "application/pdf" || fileName.endsWith(".pdf")) {
             loader = new PDFLoader(filePath, { splitPages: true });
-        } else if (file.type === "text/csv") {
+        } else if (file.type === "text/csv" || fileName.endsWith(".csv")) {
             loader = new CSVLoader(filePath);
-        } else if (file.type === "text/plain" || file.name.endsWith(".txt")) {
+        } else if (file.type === "text/plain" || fileName.endsWith(".txt")) {
             loader = new TextLoader(filePath);
+        } else if (fileName.endsWith(".vtt")) {
+            loader = new VTTLoader(filePath);
         } else {
             return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
         }
@@ -40,16 +45,20 @@ export async function POST(req: NextRequest) {
         // Load documents
         const rawDocs = await loader.load();
 
-        // Split into chunks
+        // Split into chunks with optimized settings for VTT files
+        const chunkSize = fileName.endsWith(".vtt") ? 500 : 1000; // Smaller chunks for VTT
+        const chunkOverlap = fileName.endsWith(".vtt") ? 50 : 200;
+        
         const splitter = new RecursiveCharacterTextSplitter({
-            chunkSize: 1000,
-            chunkOverlap: 200,
+            chunkSize,
+            chunkOverlap,
         });
         const docs = await splitter.splitDocuments(rawDocs);
 
-        // Add metadata (source = filename)
+        // Add metadata
         docs.forEach((doc) => {
             doc.metadata.source = file.name;
+            doc.metadata.type = fileName.endsWith(".vtt") ? "vtt" : "file";
         });
 
         // Embed & store

@@ -8,7 +8,7 @@ import { Trash2, FileText, Globe, Type } from "lucide-react"
 
 interface DataSource {
   id: string
-  type: "text" | "file" | "website"
+  type: "text" | "file" | "website" | "vtt"
   name: string
   source: string
   createdAt: Date
@@ -58,6 +58,8 @@ export function RagStore() {
         return <Type className="h-4 w-4 text-blue-500 dark:text-gray-400" />
       case "file":
         return <FileText className="h-4 w-4 text-green-500 dark:text-gray-400" />
+      case "vtt":
+        return <FileText className="h-4 w-4 text-orange-500 dark:text-gray-400" />
       case "website":
         return <Globe className="h-4 w-4 text-purple-500 dark:text-gray-400" />
       default:
