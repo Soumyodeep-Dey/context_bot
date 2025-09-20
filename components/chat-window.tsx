@@ -95,7 +95,7 @@ export function ChatWindow() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl h-[800px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
+    <Card className="p-4 shadow-md rounded-2xl h-[1000px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
       <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">
         Chat with RAG Assistant
       </Label>
