@@ -77,7 +77,7 @@ export function FileUpload() {
   }
 
   return (
-    <Card className="p-4 shadow-medium rounded-2xl glass-card hover-lift">
+    <div className="p-4">
       <div className="space-y-4">
         <Label className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">Upload Files</Label>
 
@@ -143,6 +143,6 @@ export function FileUpload() {
           </div>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

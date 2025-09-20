@@ -37,7 +37,7 @@ export function DataSourceInput() {
   }
 
   return (
-    <Card className="p-4 shadow-medium rounded-2xl glass-card hover-lift">
+    <div className="p-4">
       <div className="space-y-4">
         <Label
           htmlFor="text-input"
@@ -71,6 +71,6 @@ export function DataSourceInput() {
           </p>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

@@ -1,7 +1,4 @@
-import { DataSourceInput } from "@/components/data-source-input"
-import { FileUpload } from "@/components/file-upload"
-import { BulkUpload } from "@/components/bulk-upload"
-import { WebsiteInput } from "@/components/website-input"
+import { TabbedUpload } from "@/components/tabbed-upload"
 import { RagStore } from "@/components/rag-store"
 import { ChatWindow } from "@/components/chat-window"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -41,24 +38,15 @@ export default function Home() {
           {/* Left Column - Data Input */}
           <div className="space-y-6 animate-fade-in">
             <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              <DataSourceInput />
+              <TabbedUpload />
             </div>
             <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <FileUpload />
-            </div>
-            <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <BulkUpload />
-            </div>
-            <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
-              <WebsiteInput />
-            </div>
-            <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
               <RagStore />
             </div>
           </div>
 
           {/* Right Column - Chat */}
-          <div className="lg:sticky lg:top-8 animate-slide-up" style={{ animationDelay: '0.6s' }}>
+          <div className="lg:sticky lg:top-8 animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <ChatWindow />
           </div>
         </div>

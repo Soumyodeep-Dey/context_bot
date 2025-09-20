@@ -125,7 +125,7 @@ export function BulkUpload() {
   }
 
   return (
-    <Card className="p-6 shadow-medium rounded-2xl glass-card hover-lift">
+    <div className="p-6">
       <div className="space-y-6">
         <div>
           <Label className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">
@@ -272,6 +272,6 @@ export function BulkUpload() {
           </div>
         )}
       </div>
-    </Card>
+    </div>
   )
 }
