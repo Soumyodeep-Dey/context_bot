@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Send, Bot, User, Search, Download, MessageSquare, X, Filter } from "lucide-react"
+import { Send, Bot, User, Search, Download, MessageSquare, X, Filter, UserCheck } from "lucide-react"
 
 interface Message {
   id: string
@@ -22,7 +22,7 @@ export function ChatWindow() {
       id: "1",
       type: "ai",
       content:
-        "Hello! I'm your RAG assistant. I can help you find information from your indexed data sources. What would you like to know?",
+        "Hanji! Hello guys! Main Hitesh Choudhary hun, aur main aapke indexed data sources se information find kar sakta hun. Kya janna chahte hain aap? Chai peeke baat karte hain! ☕",
       timestamp: new Date(),
     },
   ])
@@ -31,17 +31,18 @@ export function ChatWindow() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearch, setShowSearch] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [useHiteshPersona, setUseHiteshPersona] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   const messageTemplates = [
-    "What information do you have about...?",
-    "Can you summarize the key points from...?",
-    "Find all documents related to...",
-    "What are the main topics covered in...?",
-    "Compare the information between...",
-    "Explain the concept of...",
-    "What are the latest updates on...?",
-    "Search for data about..."
+    "Kya information hai aapke paas... ke baare mein?",
+    "Main points summarize kar sakte hain... se?",
+    "Sabse related documents find karo...",
+    "Main topics kya hain... mein?",
+    "Compare karo information between...",
+    "Explain karo concept of...",
+    "Latest updates kya hain... pe?",
+    "Search karo data about..."
   ]
 
   // Auto-scroll to bottom when messages change
@@ -76,7 +77,10 @@ export function ChatWindow() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: inputValue }),
+        body: JSON.stringify({ 
+          query: inputValue,
+          persona: useHiteshPersona ? "hitesh" : "default"
+        }),
       })
 
       const data = await res.json()
@@ -144,9 +148,21 @@ export function ChatWindow() {
     <Card className="p-4 shadow-strong rounded-2xl h-[1000px] flex flex-col glass-card hover-lift">
       <div className="flex items-center justify-between mb-4">
         <Label className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">
-          Chat with RAG Assistant
+          {useHiteshPersona ? "Chat with Hitesh Sir ☕" : "Chat with RAG Assistant"}
         </Label>
         <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setUseHiteshPersona(!useHiteshPersona)}
+            className={`${useHiteshPersona 
+              ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-600 dark:text-blue-400" 
+              : "text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-gray-200"
+            }`}
+            title={useHiteshPersona ? "Hitesh Sir Mode ON" : "Regular AI Mode"}
+          >
+            <UserCheck className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
