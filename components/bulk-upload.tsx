@@ -125,10 +125,10 @@ export function BulkUpload() {
   }
 
   return (
-    <Card className="p-6 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
+    <Card className="p-6 shadow-medium rounded-2xl glass-card hover-lift">
       <div className="space-y-6">
         <div>
-          <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200">
+          <Label className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">
             Bulk Upload Files
           </Label>
           <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
@@ -138,10 +138,10 @@ export function BulkUpload() {
 
         {/* File Drop Zone */}
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
             dragActive
-              ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-              : "border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500"
+              ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 scale-105 shadow-soft"
+              : "border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500 hover:scale-102"
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -197,7 +197,7 @@ export function BulkUpload() {
           <Button
             onClick={handleUpload}
             disabled={isUploading}
-            className="w-full"
+            className="w-full gradient-button text-white"
           >
             {isUploading ? (
               <>

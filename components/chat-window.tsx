@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Send, Bot, User } from "lucide-react"
+import { Send, Bot, User, Search, Download, MessageSquare, X, Filter } from "lucide-react"
 
 interface Message {
   id: string
@@ -28,7 +28,21 @@ export function ChatWindow() {
   ])
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showSearch, setShowSearch] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  const messageTemplates = [
+    "What information do you have about...?",
+    "Can you summarize the key points from...?",
+    "Find all documents related to...",
+    "What are the main topics covered in...?",
+    "Compare the information between...",
+    "Explain the concept of...",
+    "What are the latest updates on...?",
+    "Search for data about..."
+  ]
 
   // Auto-scroll to bottom when messages change
   const scrollToBottom = () => {
@@ -38,6 +52,11 @@ export function ChatWindow() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, isLoading])
+
+  // Filter messages based on search query
+  const filteredMessages = messages.filter(message =>
+    message.content.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
@@ -94,15 +113,114 @@ export function ChatWindow() {
     }
   }
 
+  const handleTemplateSelect = (template: string) => {
+    setInputValue(template)
+    setShowTemplates(false)
+  }
+
+  const exportChat = () => {
+    const chatData = {
+      exportDate: new Date().toISOString(),
+      messageCount: messages.length,
+      messages: messages.map(msg => ({
+        type: msg.type,
+        content: msg.content,
+        timestamp: msg.timestamp.toISOString()
+      }))
+    }
+    
+    const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `chat-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <Card className="p-4 shadow-md rounded-2xl h-[1000px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
-      <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">
-        Chat with RAG Assistant
-      </Label>
+    <Card className="p-4 shadow-strong rounded-2xl h-[1000px] flex flex-col glass-card hover-lift">
+      <div className="flex items-center justify-between mb-4">
+        <Label className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">
+          Chat with RAG Assistant
+        </Label>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSearch(!showSearch)}
+            className="text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={exportChat}
+            className="text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="mb-4 animate-slide-up">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Message Templates */}
+      {showTemplates && (
+        <div className="mb-4 animate-slide-up">
+          <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+            {messageTemplates.map((template, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => handleTemplateSelect(template)}
+                className="text-left justify-start text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                {template}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {messages.map((message) => (
+        {(searchQuery ? filteredMessages : messages).map((message) => (
           <div
             key={message.id}
             className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"
@@ -181,7 +299,7 @@ export function ChatWindow() {
         <Button
           onClick={handleSendMessage}
           disabled={!inputValue.trim() || isLoading}
-          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-gray-700 dark:hover:bg-gray-600"
+          className="gradient-button text-white"
         >
           <Send className="h-4 w-4" />
         </Button>

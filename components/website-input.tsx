@@ -41,9 +41,9 @@ export function WebsiteInput() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
+    <Card className="p-4 shadow-medium rounded-2xl glass-card hover-lift">
       <div className="space-y-4">
-        <Label htmlFor="website-url" className="text-lg font-semibold text-slate-700 dark:text-gray-200">
+        <Label htmlFor="website-url" className="text-lg font-semibold bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-white bg-clip-text text-transparent">
           Website Input
         </Label>
 
@@ -62,7 +62,7 @@ export function WebsiteInput() {
           <Button
             onClick={handleFetchData}
             disabled={!url.trim() || isLoading}
-            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-gray-700 dark:hover:bg-gray-600"
+            className="gradient-button text-white"
           >
             {isLoading ? (
               <>
