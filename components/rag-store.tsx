@@ -79,7 +79,7 @@ export function RagStore() {
             <p className="text-sm">Add text, upload files, or fetch from websites above</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
             {dataSources.map((source) => (
               <div
                 key={source.id}
