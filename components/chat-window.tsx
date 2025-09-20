@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,6 +28,16 @@ export function ChatWindow() {
   ])
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when messages change
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, isLoading])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
@@ -85,7 +95,7 @@ export function ChatWindow() {
   }
 
   return (
-    <Card className="p-4 shadow-md rounded-2xl h-[600px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
+    <Card className="p-4 shadow-md rounded-2xl h-[800px] flex flex-col bg-white dark:bg-gray-900 border-slate-200 dark:border-gray-800">
       <Label className="text-lg font-semibold text-slate-700 dark:text-gray-200 mb-4">
         Chat with RAG Assistant
       </Label>
@@ -155,6 +165,7 @@ export function ChatWindow() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
